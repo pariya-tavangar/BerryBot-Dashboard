@@ -1,0 +1,41 @@
+{% extends "base.html" %}{% block title %}Settings{% endblock %}{% block crumb %}Settings{% endblock %}{% block content %}
+<div class="page-heading">
+    <div>
+        <div class="eyebrow">YOUR SPACE, YOUR RULES</div>
+        <h1>Settings ⚙️</h1>
+        <p>Keep your preferences just the way you like them.</p>
+    </div>
+</div>
+<section class="form-card">
+    <h2>Your little profile 🍓</h2>
+    <p>This name appears in your dashboard greeting and sidebar.</p>
+    <form method="post">{% csrf_token %}<div class="field" style="max-width:480px"><label for="display_name">Display
+                name</label><input id="display_name" name="display_name" maxlength="100" value="{{ prefs.display_name }}"
+                placeholder="What should we call you?"></div><button class="btn" type="submit">♡ Save settings</button>
+    </form>
+</section>
+<section class="form-card">
+    <h2>Preferences at a glance 🌷</h2>
+    <p>Your dashboard remembers these settings locally in its database.</p>
+    <div class="toggle-row">
+        <div><strong>Color theme</strong><small>Currently using
+                {{ prefs.get_theme_display|default:prefs.theme }}.</small></div><a class="text-link"
+            href="{% url 'customization' %}">Change →</a>
+    </div>
+    <div class="toggle-row">
+        <div><strong>Compact
+                layout</strong><small>{% if prefs.compact_mode %}Enabled{% else %}Disabled{% endif %}</small></div>
+    </div>
+    <div class="toggle-row">
+        <div><strong>Gentle
+                animations</strong><small>{% if prefs.animations %}Enabled{% else %}Disabled{% endif %}</small></div>
+    </div>
+</section>
+<section class="form-card">
+    <h2>Security & connections 🔒</h2>
+    <p>Keep your bot tokens private. Anyone with a token can control its bot. This starter version is designed for local
+        use and doesn't yet include user login or per-user access separation.</p>
+    <div class="notice">Before hosting publicly, add login enforcement, user-owned bot records, HTTPS, rate limiting,
+        and encrypted token storage. Never commit your .env file or db.sqlite3.</div><a class="btn secondary"
+        href="{% url 'bots' %}">Manage bot connections ↗</a>
+</section>{% endblock %}

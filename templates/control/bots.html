@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}
+My bots
+{% endblock %}
+
+{% block crumb %}My bots{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <div class="eyebrow">YOUR TINY TEAM</div>
+        <h1>My bots ♥</h1>
+        <p>All your Telegram helpers, gathered in one happy place.</p>
+    </div><a href="#add-bot" class="btn">＋ Add a bot</a>
+</div>
+<div class="stats">
+    <div class="stat">
+        <div class="stat-top">Total bots <div class="stat-icon">🤖</div>
+        </div>
+        <div class="stat-number">{{ bot_count }}</div>
+        <div class="stat-note">♡ in your collection</div>
+    </div>
+    <div class="stat">
+        <div class="stat-top">Active <div class="stat-icon">🌱</div>
+        </div>
+        <div class="stat-number">{{ bot_count }}</div>
+        <div class="stat-note">✿ saved connections</div>
+    </div>
+</div>
+<div class="cards-grid">{% for bot in bot_list %}<article class="bot-card">
+        <div class="bot-card-head">
+            <div class="bot-face">
+                {% if bot.profile_image %}
+                <img
+                    src="{{ bot.profile_image.url }}"
+                    alt="{{ bot.name }} profile picture"
+                    class="bot-avatar"
+                >
+            {% else %}
+                <div class="bot-avatar bot-avatar-placeholder">
+                    🤖
+                </div>
+            {% endif %}
+            </div>
+            <div style="min-width:0;flex:1">
+                <h3>{{ bot.name }}</h3>
+                <p>@{{ bot.username|default:"unknown" }}</p>
+            </div><span
+                class="status {% if bot.is_active %}online{% else %}offline{% endif %}">{% if bot.is_active %}Active{% else %}Paused{% endif %}</span>
+        </div>
+        <div style="margin-top:16px;font-size:11px;color:var(--muted)">Added
+            {{ bot.created_at|date:"M j, Y" }}</div>
+        <div class="bot-card-foot"><span class="muted" style="font-size:11px">API token stored privately in local
+                DB</span>
+            <form method="post" action="{% url 'delete_bot' bot.id %}">{% csrf_token %}<button
+                    class="btn secondary small"
+                    onclick="return confirm('Remove this bot from your garden?')">Remove</button></form>
+        </div>
+    </article>
+    {% empty %}
+    
+    <div class="panel empty" style="grid-column:1/-1">
+        <div class="big">🪴</div><strong>No bots yet — let's change that!</strong>
+
+        <p>Connect your first bot using its token from BotFather.</p>
+    </div>{% endfor %}</div>
+
+<section class="form-card" id="add-bot" style="margin-top:20px">
+    <h2>Welcome a new helper 🍓</h2>
+    <p>Paste the API token from @BotFather. We'll check it with Telegram before saving it.</p>
+    <div class="notice">🔒 Your token grants control over the bot. Never share it publicly or commit it to Git.</div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="two-col">
+            <div class="field">
+                <label for="name">A name for your bot</label>
+                <input id="name" name="name"
+                    placeholder="e.g. Strawberry Updates" required></div>
+            <div class="field">
+                <label for="token">Telegram Bot API token</label>
+                <input id="token" name="token"
+                    type="password" autocomplete="new-password" placeholder="123456:ABC-..." required>
+                </div>
+        </div>
+        <button class="btn" type="submit">♡ Connect my bot</button>
+    </form>
+</section>{% endblock %}

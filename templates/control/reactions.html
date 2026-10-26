@@ -1,0 +1,54 @@
+{% extends "base.html" %}{% block title %}Reactions{% endblock %}{% block crumb %}Reactions{% endblock %}{% block content %}
+<div class="page-heading">
+    <div>
+        <div class="eyebrow">A LITTLE LOVE GOES A LONG WAY</div>
+        <h1>Reactions 💗</h1>
+        <p>Pick an emoji and leave a little sparkle on a message.</p>
+    </div>
+</div>
+<div class="content-grid">
+    <section class="form-card">
+        <h2>Leave a reaction 🌸</h2>
+        <p>Choose the bot, find the message, and send your emoji.</p>{% if not bots %}<div class="notice">Connect a bot
+            first in <a href="{% url 'bots' %}"><b>My bots</b></a>.</div>{% endif %}<form method="post"
+            action="{% url 'apply_reaction' %}">{% csrf_token %}<div class="field"><label for="bot_id">Your
+                    bot</label><select name="bot_id" id="bot_id" required>{% for bot in bots %}<option
+                        value="{{ bot.id }}">{{ bot.name }} (@{{ bot.username }})</option>{% endfor %}</select></div>
+            <div class="two-col">
+                <div class="field"><label for="chat_id">Chat ID</label><input id="chat_id" name="chat_id"
+                        placeholder="-1001234567890" required></div>
+                <div class="field"><label for="message_id">Message ID</label><input id="message_id" name="message_id"
+                        type="number" min="1" placeholder="42" required></div>
+            </div>
+            <div class="field"><label>Choose your emoji</label>
+                <div class="emoji-grid">{% for emoji in emoji_choices %}<button
+                        class="emoji-choice {% if forloop.first %}selected{% endif %}" type="button"
+                        data-emoji="{{ emoji }}">{{ emoji }}</button>{% endfor %}</div><input type="hidden" name="emoji"
+                    id="chosen-emoji" value="❤️">
+            </div><button class="btn" type="submit" {% if not bots %}disabled{% endif %}>♡ Add reaction</button>
+        </form>
+    </section>
+    <div>
+        <section class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2>Your emoji palette 🎨</h2>
+                    <p>Little expressions for every occasion.</p>
+                </div>
+            </div>
+            <div class="emoji-grid">{% for emoji in emoji_choices %}<div style="text-align:center">
+                    <div style="font-size:29px;margin-bottom:7px">{{ emoji }}</div><small
+                        class="muted">{% cycle 'Love' 'Sweet' 'Like' 'Fire' 'Sparkle' 'Party' 'Adore' 'Clap' 'Soft' 'Bloom' %}</small>
+                </div>{% endfor %}</div>
+        </section>
+        <div class="notice">🌷 Telegram only allows reactions where the chat supports them. The bot may need suitable
+            permissions, and some chats restrict available emoji.</div>
+    </div>
+</div>
+<script>
+    document.querySelectorAll('.emoji-choice').forEach(b => b.addEventListener('click', () => {
+        document.querySelectorAll('.emoji-choice').forEach(x => x.classList.remove('selected'));
+        b.classList.add('selected');
+        document.getElementById('chosen-emoji').value = b.dataset.emoji;
+    }));
+</script>{% endblock %}

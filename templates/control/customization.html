@@ -1,0 +1,48 @@
+{% extends "base.html" %}{% block title %}Customization{% endblock %}{% block crumb %}Customization{% endblock %}{% block content %}
+<div class="page-heading">
+    <div>
+        <div class="eyebrow">MAKE YOURSELF AT HOME</div>
+        <h1>Your cozy corner 🎨</h1>
+        <p>Pick a palette and make this little workspace feel like yours.</p>
+    </div>
+</div>
+<form method="post">{% csrf_token %}<section class="form-card">
+        <h2>Choose your mood 🌈</h2>
+        <p>Your colors update across the dashboard and stay saved for your next visit.</p>
+        <div class="theme-options">
+            <label class="theme-option">
+                <div class="swatches"><i style="background:#fff0f5"></i><i style="background:#ee8eae"></i><i
+                        style="background:#d95f8a"></i></div><input type="radio" name="theme" value="strawberry"
+                    {% if prefs.theme == 'strawberry' %}checked{% endif %}> <span>Strawberry Milk</span>
+            </label>
+            <label class="theme-option">
+                <div class="swatches"><i style="background:#f4f0ff"></i><i style="background:#ad9be8"></i><i
+                        style="background:#8770ce"></i></div><input type="radio" name="theme" value="lavender"
+                    {% if prefs.theme == 'lavender' %}checked{% endif %}> <span>Lavender Dream</span>
+            </label>
+            <label class="theme-option">
+                <div class="swatches"><i style="background:#edf6ee"></i><i style="background:#9ebda1"></i><i
+                        style="background:#648b69"></i></div><input type="radio" name="theme" value="matcha"
+                    {% if prefs.theme == 'matcha' %}checked{% endif %}> <span>Matcha Garden</span>
+            </label>
+            <label class="theme-option">
+                <div class="swatches"><i style="background:#201d2b"></i><i style="background:#443146"></i><i
+                        style="background:#d58bb4"></i></div><input type="radio" name="theme" value="midnight"
+                    {% if prefs.theme == 'midnight' %}checked{% endif %}> <span>Midnight Cozy</span>
+            </label>
+        </div>
+    </section>
+    <section class="form-card">
+        <h2>Little details ✨</h2>
+        <p>Small comforts to make the interface just right.</p>
+        <div class="toggle-row">
+            <div><strong>Compact layout</strong><small>Keep cards and spaces a little tighter.</small></div><input
+                type="checkbox" name="compact_mode" {% if prefs.compact_mode %}checked{% endif %}>
+        </div>
+        <div class="toggle-row">
+            <div><strong>Gentle animations</strong><small>Keep the little hover movements and transitions.</small></div>
+            <input type="checkbox" name="animations" {% if prefs.animations %}checked{% endif %}>
+        </div>
+        <div style="margin-top:20px"><button class="btn" type="submit">♡ Save my style</button></div>
+    </section>
+</form>{% endblock %}

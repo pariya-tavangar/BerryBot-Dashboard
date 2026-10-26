@@ -1,0 +1,71 @@
+{% extends "base.html" %}{% block title %}Messages{% endblock %}{% block crumb %}Messages{% endblock %}{% block content %}
+<div class="page-heading">
+    <div>
+        <div class="eyebrow">LITTLE NOTES & BIG FEELINGS</div>
+        <h1>Messages 💌</h1>
+        <p>Write once, save your favorite templates, and send with a little sparkle.</p>
+    </div>
+</div>
+<div class="content-grid">
+    <div>
+        <section class="form-card">
+            <h2>Send a message ✨</h2>
+            <p>Choose a bot and a chat or channel it can access.</p>{% if not bots %}<div class="notice">You need to <a
+                    href="{% url 'bots' %}"><b>connect a bot</b></a> before sending messages.</div>{% endif %}<form
+                method="post" action="{% url 'send_message' %}">{% csrf_token %}<div class="field"><label
+                        for="bot_id">Send with</label><select name="bot_id" id="bot_id" required>{% for bot in bots %}
+                        <option value="{{ bot.id }}">{{ bot.name }} (@{{ bot.username }})</option>{% endfor %}</select></div>
+                <div class="field"><label for="chat_id">Recipient chat ID or channel username</label><input id="chat_id"
+                        name="chat_id" placeholder="@yourchannel or -1001234567890" required><small>The bot must be able
+                        to access the chat. For channels, it usually needs posting permissions.</small></div>
+                <div class="field"><label for="message-body">Your message</label><textarea id="message-body" name="body"
+                        placeholder="Write something lovely..." required></textarea><small>Plain text is supported.
+                        Telegram formatting options can be added later.</small></div><button class="btn" type="submit"
+                    {% if not bots %}disabled{% endif %}>♡ Send message</button>
+            </form>
+        </section>
+        <section class="form-card">
+            <h2>Save a template 📝</h2>
+            <p>Keep your most-used messages close at hand.</p>
+            <form method="post">{% csrf_token %}<div class="field"><label for="template_name">Template
+                        name</label><input id="template_name" name="template_name" placeholder="e.g. Weekly hello"
+                        required></div>
+                <div class="field"><label for="body">Template text</label><textarea name="body" id="body"
+                        placeholder="Hey there! Hope your week is blooming 🌸" required></textarea></div><button
+                    class="btn secondary" type="submit">＋ Save template</button>
+            </form>
+        </section>
+    </div>
+    <div>
+        <section class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2>Your message box 🎀</h2>
+                    <p>Tap a template to use it in the composer.</p>
+                </div>
+            </div>{% if templates %}<div class="template-list">{% for t in templates %}<button type="button"
+                    class="template use-template" style="text-align:left;width:100%"><strong>{{ t.name }}</strong>
+                    <p>{{ t.body|truncatechars:180 }}</p><span class="text-link"
+                        style="display:inline-block;margin-top:9px">Use this template ↗</span>
+                </button>{% endfor %}</div>{% else %}<div class="empty">
+                <div class="big">💌</div><strong>Your message box is empty</strong>
+                <p>Save a template and it'll appear here.</p>
+            </div>{% endif %}
+        </section>
+        <div class="notice">🌷 Sending is a real Telegram action. Double-check the recipient before you send, especially
+            for public channels.</div>
+    </div>
+</div>
+<script>
+    document.querySelectorAll('.use-template').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const text = btn.querySelector('p').textContent;
+            document.getElementById('message-body').value = text;
+            document.getElementById('message-body').focus();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>{% endblock %}

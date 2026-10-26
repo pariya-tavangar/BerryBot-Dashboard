@@ -1,0 +1,116 @@
+{% extends "base.html" %}{% block title %}Dashboard{% endblock %}{% block crumb %}Dashboard{% endblock %}{% block content %}
+<section class="greeting">
+    <div>
+        <div class="eyebrow">MONDAY MOOD · GOOD THINGS AHEAD</div>
+        <h1>Hey, {{ prefs.display_name }}! <span>🌸</span></h1>
+        <p>Your little bot garden is looking lovely. Here's what's blooming today.</p>
+    </div>
+    <div class="greeting-art">🍓</div>
+</section>
+<div class="stats">
+    <div class="stat">
+        <div class="stat-top">Connected bots <div class="stat-icon">🤖</div>
+        </div>
+        <div class="stat-number">{{ bot_count }}</div>
+        <div class="stat-note">✿ {{ active_bots }} marked active</div>
+    </div>
+    <div class="stat">
+        <div class="stat-top">Messages sent <div class="stat-icon">💌</div>
+        </div>
+        <div class="stat-number">{{ sent_count }}</div>
+        <div class="stat-note">♡ from your activity history</div>
+    </div>
+    <div class="stat">
+        <div class="stat-top">Saved templates <div class="stat-icon">📝</div>
+        </div>
+        <div class="stat-number">{{ templates|length }}</div>
+        <div class="stat-note">✦ latest templates shown below</div>
+    </div>
+    <div class="stat">
+        <div class="stat-top">Garden status <div class="stat-icon">🌱</div>
+        </div>
+        <div class="stat-number" style="font-size:23px">{{ active_bots }} growing</div>
+        <div class="stat-note">♡ keep your tokens safe</div>
+    </div>
+</div>
+<div class="content-grid">
+    <div>
+        <section class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2>Your little helpers ✨</h2>
+                    <p>A quick peek at your connected bots</p>
+                </div><a class="text-link" href="{% url 'bots' %}">All bots →</a>
+            </div>
+            {% if bots %}<div class="bot-list">{% for bot in bots|slice:":4" %}<div class="bot-row">
+                    <div class="bot-face"> {% if bot.profile_image %}
+                <img
+                    src="{{ bot.profile_image.url }}"
+                    alt="{{ bot.name }} profile picture"
+                    class="bot-avatar">
+            {% else %}
+                <div class="bot-avatar bot-avatar-placeholder">
+                    {% cycle '🧸' '🐰' '🐣' '🐱' %}
+                </div>
+            {% endif %}
+                    </div>
+                    <div class="bot-info">
+                        <strong>{{ bot.name }}</strong><small>@{{ bot.username|default:"username unavailable" }}</small>
+                    </div><span
+                        class="status {% if bot.is_active %}online{% else %}offline{% endif %}">{% if bot.is_active %}Active{% else %}Paused{% endif %}</span>
+                </div>{% endfor %}</div>{% else %}<div class="empty">
+                <div class="big">🪴</div><strong>Your garden is ready to grow!</strong>
+                <p>Add your first Telegram bot and watch it appear here.</p><a class="btn small"
+                    href="{% url 'bots' %}">＋ Add a bot</a>
+            </div>{% endif %}
+        </section>
+        <section class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2>Recent little happenings</h2>
+                    <p>Everything your bots have been up to</p>
+                </div>
+            </div>
+            {% if activities %}<div class="activity">{% for item in activities %}<div class="activity-row">
+                    <div class="activity-icon">
+                        {% if item.kind == 'sent' %}💌{% elif item.kind == 'bot' %}🤖{% elif item.kind == 'reaction' %}💗{% else %}✨{% endif %}
+                    </div>
+                    <div><strong>{{ item.text }}</strong><small>{{ item.created_at|timesince }} ago</small></div>
+                </div>{% endfor %}</div>{% else %}<div class="empty">
+                <div class="big">🫧</div><strong>All quiet for now</strong>
+                <p>Bot connections and sent messages will show up here.</p>
+            </div>{% endif %}
+        </section>
+    </div>
+    <div>
+        <section class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2>Quick actions 🎀</h2>
+                    <p>A little shortcut for you</p>
+                </div>
+            </div>
+            <div class="quick-grid"><a class="quick" href="{% url 'bots' %}"><span>🤖</span><strong>Add a
+                        bot</strong><small>Bring a helper home</small></a><a class="quick"
+                    href="{% url 'messages' %}"><span>💌</span><strong>Send a message</strong><small>Spread some
+                        words</small></a><a class="quick" href="{% url 'reactions' %}"><span>💖</span><strong>Leave a
+                        reaction</strong><small>Share the love</small></a><a class="quick"
+                    href="{% url 'customization' %}"><span>🎨</span><strong>Make it yours</strong><small>Pick your
+                        palette</small></a></div>
+        </section>
+        <section class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2>Saved notes 📝</h2>
+                    <p>Your message templates</p>
+                </div><a class="text-link" href="{% url 'messages' %}">Manage →</a>
+            </div>{% if templates %}<div class="template-list">{% for t in templates %}<div class="template">
+                    <strong>{{ t.name }}</strong>
+                    <p>{{ t.body|truncatechars:100 }}</p>
+                </div>{% endfor %}</div>{% else %}<div class="empty">
+                <div class="big">💌</div><strong>Words waiting to bloom</strong>
+                <p>Save a message template to reuse it anytime.</p>
+            </div>{% endif %}
+        </section>
+    </div>
+</div>{% endblock %}

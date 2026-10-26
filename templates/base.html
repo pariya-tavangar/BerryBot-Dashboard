@@ -1,0 +1,92 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff0f5">
+  <title>{% block title %}Home{% endblock %} | Berry Bots</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+
+<body
+  class="theme-{{ prefs.theme|default:'strawberry' }} {% if prefs.compact_mode %}compact{% endif %} {% if not prefs.animations %}no-animations{% endif %}">
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <a href="{% url 'dashboard' %}" class="brand">
+        <div class="brand-icon">
+          <img src="{% static 'images/berrybot.png' %}" alt="">
+        </div>
+        <div>
+          <strong>berry bots</strong><small>your little bot garden</small></div>
+      </a>
+      <div class="nav-label">Workspace</div>
+      <nav class="nav">
+        <a class="{% if active == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><span
+            class="ico">⌂</span> Dashboard</a>
+        <a class="{% if active == 'bots' %}active{% endif %}" href="{% url 'bots' %}"><span class="ico">🤖</span> My
+          bots <span style="margin-left:auto;font-size:10px">{{ bot_count }}</span></a>
+        <a class="{% if active == 'messages' %}active{% endif %}" href="{% url 'messages' %}"><span class="ico">✉</span>
+          Messages</a>
+        <a class="{% if active == 'reactions' %}active{% endif %}" href="{% url 'reactions' %}"><span
+            class="ico">♡</span> Reactions</a>
+      </nav>
+      <div class="nav-label" style="margin-top:22px">Your space</div>
+      <nav class="nav">
+        <a class="{% if active == 'customization' %}active{% endif %}" href="{% url 'customization' %}"><span
+            class="ico">✿</span> Customization</a>
+        <a class="{% if active == 'settings' %}active{% endif %}" href="{% url 'settings' %}"><span class="ico">⚙</span>
+          Settings</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="helper-card">
+          <div class="berry">🧁</div><strong>A little reminder</strong>
+          <p>Your bots are happiest when their tokens stay secret. Keep them safe, berry safe!</p>
+        </div>
+        <div class="profile">
+          <div class="avatar">🍓</div>
+          <div><strong>{{ prefs.display_name|default:"Berry" }}</strong><small>Bot garden
+              keeper</small></div>
+        </div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px"><button class="icon-btn mobile-menu"
+            onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Open menu">☰</button>
+          <div class="mobile-brand"><span>🍓</span> berry bots</div>
+          <div class="crumb" style="display:none" id="desktop-crumb">Workspace /
+            <b>{% block crumb %}Dashboard{% endblock %}</b></div>
+        </div>
+        <div class="top-actions">
+          <div class="date-chip">🌷 &nbsp; a cozy little workspace</div><a class="icon-btn" href="{% url 'settings' %}"
+            aria-label="Settings">⚙</a>
+        </div>
+      </header>
+      {% if messages %}<div class="messages">{% for message in messages %}<div
+          class="alert {% if message.tags == 'error' %}error{% endif %}">{{ message }}</div>{% endfor %}</div>{% endif %}
+      {% block content %}{% endblock %}
+      <div class="footer">made with <span>♥</span> and a little strawberry magic</div>
+    </main>
+  </div>
+  <script>
+    (function () {
+      const c = document.getElementById('desktop-crumb');
+      if (c && window.innerWidth > 720) c.style.display = 'block';
+      window.addEventListener('resize', () => {
+        if (c) c.style.display = window.innerWidth > 720 ? 'block' : 'none'
+      });
+    })();
+
+    function useTemplate(text) {
+      const field = document.getElementById('message-body');
+      if (field) {
+        field.value = text;
+        field.focus();
+      }
+    }
+  </script>
+</body>
+
+</html>
