@@ -1,3 +1,4 @@
+![banner](static/images/banner.png)
 # Strawberry Bot Control Center 🍓
 
 A responsive Django dashboard for managing Telegram bots, message templates, sending messages, and configuring reactions.
