@@ -125,6 +125,7 @@ def apply_reaction(request):
     chat_id = request.POST.get("chat_id", "").strip()
     message_id = request.POST.get("message_id", "").strip()
     emoji = request.POST.get("emoji", "❤️")
+    
     if not chat_id or not message_id:
         messages.error(request, "Add both a chat ID and message ID.")
         return redirect("reactions")

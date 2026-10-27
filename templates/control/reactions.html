@@ -1,4 +1,8 @@
-{% extends "base.html" %}{% block title %}Reactions{% endblock %}{% block crumb %}Reactions{% endblock %}{% block content %}
+{% extends "base.html" %}
+{% block title %}Reactions{% endblock %}
+{% block crumb %}Reactions{% endblock %}
+
+{% block content %}
 <div class="page-heading">
     <div>
         <div class="eyebrow">A LITTLE LOVE GOES A LONG WAY</div>
@@ -6,6 +10,7 @@
         <p>Pick an emoji and leave a little sparkle on a message.</p>
     </div>
 </div>
+
 <div class="content-grid">
     <section class="form-card">
         <h2>Leave a reaction 🌸</h2>
@@ -14,20 +19,24 @@
             action="{% url 'apply_reaction' %}">{% csrf_token %}<div class="field"><label for="bot_id">Your
                     bot</label><select name="bot_id" id="bot_id" required>{% for bot in bots %}<option
                         value="{{ bot.id }}">{{ bot.name }} (@{{ bot.username }})</option>{% endfor %}</select></div>
+
             <div class="two-col">
                 <div class="field"><label for="chat_id">Chat ID</label><input id="chat_id" name="chat_id"
                         placeholder="-1001234567890" required></div>
                 <div class="field"><label for="message_id">Message ID</label><input id="message_id" name="message_id"
                         type="number" min="1" placeholder="42" required></div>
             </div>
+
             <div class="field"><label>Choose your emoji</label>
                 <div class="emoji-grid">{% for emoji in emoji_choices %}<button
                         class="emoji-choice {% if forloop.first %}selected{% endif %}" type="button"
                         data-emoji="{{ emoji }}">{{ emoji }}</button>{% endfor %}</div><input type="hidden" name="emoji"
                     id="chosen-emoji" value="❤️">
-            </div><button class="btn" type="submit" {% if not bots %}disabled{% endif %}>♡ Add reaction</button>
+            </div>
+            <button class="btn" type="submit" {% if not bots %}disabled{% endif %}>♡ Add reaction</button>
         </form>
     </section>
+
     <div>
         <section class="panel">
             <div class="panel-head">

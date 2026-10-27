@@ -1,4 +1,9 @@
-{% extends "base.html" %}{% block title %}Messages{% endblock %}{% block crumb %}Messages{% endblock %}{% block content %}
+{% extends "base.html" %}
+
+{% block title %}Messages{% endblock %}
+{% block crumb %}Messages{% endblock %}
+
+{% block content %}
 <div class="page-heading">
     <div>
         <div class="eyebrow">LITTLE NOTES & BIG FEELINGS</div>
@@ -43,19 +48,25 @@
                     <h2>Your message box 🎀</h2>
                     <p>Tap a template to use it in the composer.</p>
                 </div>
-            </div>{% if templates %}<div class="template-list">{% for t in templates %}<button type="button"
+            </div>{% if templates %}<div class="template-list">
+                
+                {% for t in templates %}
+                <button type="button"
                     class="template use-template" style="text-align:left;width:100%"><strong>{{ t.name }}</strong>
                     <p>{{ t.body|truncatechars:180 }}</p><span class="text-link"
                         style="display:inline-block;margin-top:9px">Use this template ↗</span>
                 </button>{% endfor %}</div>{% else %}<div class="empty">
+
                 <div class="big">💌</div><strong>Your message box is empty</strong>
                 <p>Save a template and it'll appear here.</p>
             </div>{% endif %}
         </section>
+        
         <div class="notice">🌷 Sending is a real Telegram action. Double-check the recipient before you send, especially
             for public channels.</div>
     </div>
 </div>
+
 <script>
     document.querySelectorAll('.use-template').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -68,4 +79,6 @@
             });
         });
     });
-</script>{% endblock %}
+</script>
+
+{% endblock %}

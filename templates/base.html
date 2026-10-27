@@ -11,8 +11,16 @@
 </head>
 
 <body
+
   class="theme-{{ prefs.theme|default:'strawberry' }} {% if prefs.compact_mode %}compact{% endif %} {% if not prefs.animations %}no-animations{% endif %}">
+  
+
+
+
+
   <div class="shell">
+
+
     <aside class="sidebar" id="sidebar">
       <a href="{% url 'dashboard' %}" class="brand">
         <div class="brand-icon">
@@ -24,8 +32,8 @@
       <div class="nav-label">Workspace</div>
       <nav class="nav">
         <a class="{% if active == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><span
-            class="ico">⌂</span> Dashboard</a>
-        <a class="{% if active == 'bots' %}active{% endif %}" href="{% url 'bots' %}"><span class="ico">🤖</span> My
+            class="ico">𖠿</span> Dashboard</a>
+        <a class="{% if active == 'bots' %}active{% endif %}" href="{% url 'bots' %}"><span class="ico">𖠌</span> My
           bots <span style="margin-left:auto;font-size:10px">{{ bot_count }}</span></a>
         <a class="{% if active == 'messages' %}active{% endif %}" href="{% url 'messages' %}"><span class="ico">✉</span>
           Messages</a>
@@ -51,6 +59,11 @@
         </div>
       </div>
     </aside>
+
+
+
+
+
     <main class="main">
       <header class="topbar">
         <div style="display:flex;align-items:center;gap:12px"><button class="icon-btn mobile-menu"
@@ -69,7 +82,10 @@
       {% block content %}{% endblock %}
       <div class="footer">made with <span>♥</span> and a little strawberry magic</div>
     </main>
+
   </div>
+
+  
   <script>
     (function () {
       const c = document.getElementById('desktop-crumb');

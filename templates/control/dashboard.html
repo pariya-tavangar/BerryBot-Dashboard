@@ -1,15 +1,23 @@
-{% extends "base.html" %}{% block title %}Dashboard{% endblock %}{% block crumb %}Dashboard{% endblock %}{% block content %}
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block crumb %}Dashboard{% endblock %}
+
+
+{% block content %}
 <section class="greeting">
     <div>
-        <div class="eyebrow">MONDAY MOOD · GOOD THINGS AHEAD</div>
+        <div class="eyebrow">Good z · GOOD THINGS AHEAD</div>
         <h1>Hey, {{ prefs.display_name }}! <span>🌸</span></h1>
         <p>Your little bot garden is looking lovely. Here's what's blooming today.</p>
     </div>
     <div class="greeting-art">🍓</div>
 </section>
+
+
 <div class="stats">
     <div class="stat">
-        <div class="stat-top">Connected bots <div class="stat-icon">🤖</div>
+        <div class="stat-top">Connected bots <div class="stat-icon">👾</div>
         </div>
         <div class="stat-number">{{ bot_count }}</div>
         <div class="stat-note">✿ {{ active_bots }} marked active</div>
@@ -33,6 +41,8 @@
         <div class="stat-note">♡ keep your tokens safe</div>
     </div>
 </div>
+
+
 <div class="content-grid">
     <div>
         <section class="panel">
@@ -73,7 +83,7 @@
             </div>
             {% if activities %}<div class="activity">{% for item in activities %}<div class="activity-row">
                     <div class="activity-icon">
-                        {% if item.kind == 'sent' %}💌{% elif item.kind == 'bot' %}🤖{% elif item.kind == 'reaction' %}💗{% else %}✨{% endif %}
+                        {% if item.kind == 'sent' %}💌{% elif item.kind == 'bot' %}👾{% elif item.kind == 'reaction' %}💗{% else %}✨{% endif %}
                     </div>
                     <div><strong>{{ item.text }}</strong><small>{{ item.created_at|timesince }} ago</small></div>
                 </div>{% endfor %}</div>{% else %}<div class="empty">
@@ -90,7 +100,7 @@
                     <p>A little shortcut for you</p>
                 </div>
             </div>
-            <div class="quick-grid"><a class="quick" href="{% url 'bots' %}"><span>🤖</span><strong>Add a
+            <div class="quick-grid"><a class="quick" href="{% url 'bots' %}"><span>👾</span><strong>Add a
                         bot</strong><small>Bring a helper home</small></a><a class="quick"
                     href="{% url 'messages' %}"><span>💌</span><strong>Send a message</strong><small>Spread some
                         words</small></a><a class="quick" href="{% url 'reactions' %}"><span>💖</span><strong>Leave a
@@ -98,6 +108,7 @@
                     href="{% url 'customization' %}"><span>🎨</span><strong>Make it yours</strong><small>Pick your
                         palette</small></a></div>
         </section>
+
         <section class="panel">
             <div class="panel-head">
                 <div>
@@ -112,5 +123,8 @@
                 <p>Save a message template to reuse it anytime.</p>
             </div>{% endif %}
         </section>
+
     </div>
-</div>{% endblock %}
+</div>
+
+{% endblock %}
