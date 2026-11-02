@@ -13,7 +13,6 @@ py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 Copy-Item .env.example .env
-python manage.py makemigrations berrybot
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
@@ -21,6 +20,10 @@ python manage.py runserver
 Open http://127.0.0.1:8000/
 
 If PowerShell blocks activation, run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in that terminal, then activate again.
+
+## Project docs
+
+The project audit, architecture notes, and improvement roadmap live in the `docs/` directory.
 
 ## Telegram notes
 - Add a bot in **My bots** with its API token. The app calls Telegram `getMe` to validate the token.

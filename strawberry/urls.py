@@ -18,7 +18,6 @@ urlpatterns = [
     path("reactions/apply/", views.apply_reaction, name="apply_reaction"),
     path("customization/", views.customization, name="customization"),
     path("settings/", views.settings_page, name="settings"),
-    path("admin/", admin.site.urls),
 ]
 
 if settings.DEBUG:

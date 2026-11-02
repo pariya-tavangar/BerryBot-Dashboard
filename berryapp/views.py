@@ -1,12 +1,13 @@
-import json
 import requests
 from django.contrib import messages
+from django.db.models import Count, Q
+from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
 from django.views.decorators.http import require_POST
-from .models import TelegramBot,TelegramChat ,MessageTemplate, Activity, UserPreference
+from .models import TelegramBot, TelegramChat, MessageTemplate, Activity, UserPreference
 
 from .utils import fetch_bot_profile_image
+
 
 def get_prefs():
     pref, _ = UserPreference.objects.get_or_create(pk=1)
@@ -17,16 +18,55 @@ def log_activity(kind, text):
     Activity.objects.create(kind=kind, text=text)
 
 
-def base_context(active):
-    return {"active": active, "bots": TelegramBot.objects.all().order_by("-created_at"),
-            "prefs": get_prefs(), "bot_count": TelegramBot.objects.count()}
+def base_context(active, *, include_bots=False):
+    context = {
+        "active": active,
+        "prefs": get_prefs(),
+    }
+    if include_bots:
+        bots = list(TelegramBot.objects.order_by("-created_at"))
+        context.update(
+            bots=bots,
+            bot_count=len(bots),
+            active_bot_count=sum(bot.is_active for bot in bots),
+        )
+    else:
+        bot_counts = TelegramBot.objects.aggregate(
+            total=Count("pk"),
+            active=Count("pk", filter=Q(is_active=True)),
+        )
+        context.update(
+            bot_count=bot_counts["total"],
+            active_bot_count=bot_counts["active"],
+        )
+    return context
+
+
+def get_posted_bot(request):
+    bot_id = request.POST.get("bot_id", "")
+    if not bot_id.isdecimal():
+        raise Http404
+    return get_object_or_404(TelegramBot, pk=bot_id)
+
+
+def telegram_response_data(response):
+    data = response.json()
+    if not isinstance(data, dict):
+        raise ValueError("Telegram returned an invalid response.")
+    return data
+
+
+def telegram_error_description(data):
+    description = data.get("description")
+    return description if isinstance(description, str) else "unknown error"
 
 
 def dashboard(request):
     ctx = base_context("dashboard")
-    ctx.update({"templates": MessageTemplate.objects.order_by("-updated_at")[:4],
+    ctx.update({"bots": TelegramBot.objects.order_by("-created_at")[:4],
+                "templates": MessageTemplate.objects.order_by("-updated_at")[:4],
                 "activities": Activity.objects.all()[:6],
-                "active_bots": TelegramBot.objects.filter(is_active=True).count(),
+                "active_bots": ctx["active_bot_count"],
                 "sent_count": Activity.objects.filter(kind="sent").count()})
     return render(request, "pages/dashboard.html", ctx)
 
@@ -43,9 +83,16 @@ def bots(request):
                     f"https://api.telegram.org/bot{token}/getMe",
                     timeout=12,)
 
-                data = response.json()
-                if response.ok and data.get("ok"):
-                    info = data["result"]
+                data = telegram_response_data(response)
+
+                info = data.get("result")
+                if (
+                    response.ok
+                    and data.get("ok") is True
+                    and isinstance(info, dict)
+                    and isinstance(info.get("id"), int)
+                    and not isinstance(info.get("id"), bool)
+                ):
                     bot = TelegramBot.objects.create(name=name, username=info.get("username", ""), token=token)
                     fetch_bot_profile_image(bot)
                     log_activity("bot", f"Connected @{bot.username or bot.name}")
@@ -56,7 +103,7 @@ def bots(request):
                 messages.error(request, "Could not reach Telegram. Check your connection and try again.")
         return redirect("bots")
     
-    ctx = base_context("bots")
+    ctx = base_context("bots", include_bots=True)
     ctx["bot_list"] = ctx["bots"]
     return render(request, "pages/bots.html", ctx)
 
@@ -84,19 +131,15 @@ def messages_page(request):
         return redirect("messages")
 
     
-    ctx = base_context("messages")
+    ctx = base_context("messages", include_bots=True)
     ctx["templates"] = MessageTemplate.objects.order_by("-updated_at")
-    ctx["saved_chats"] = TelegramChat.objects.select_related("bot").order_by("-last_used")
     return render(request, "pages/messages.html", ctx)
 
 
 
 @require_POST
 def send_message(request):
-    bot = get_object_or_404(
-        TelegramBot,
-        pk=request.POST.get("bot_id")
-    )
+    bot = get_posted_bot(request)
 
     chat_id = request.POST.get("chat_id", "").strip()
     body = request.POST.get("body", "").strip()
@@ -118,13 +161,16 @@ def send_message(request):
             timeout=15,
         )
 
-        data = response.json()
+        data = telegram_response_data(response)
 
-        if response.ok and data.get("ok"):
-            # Get the actual chat returned by Telegram
-            chat = data["result"]["chat"]
-
-            # Save the chat or update its existing record
+        result = data.get("result")
+        chat = result.get("chat") if isinstance(result, dict) else None
+        if (
+            response.ok
+            and data.get("ok") is True
+            and isinstance(chat, dict)
+            and chat.get("id") is not None
+        ):
             TelegramChat.objects.update_or_create(
                 bot=bot,
                 chat_id=str(chat["id"]),
@@ -153,7 +199,7 @@ def send_message(request):
             messages.error(
                 request,
                 "Telegram could not send it: "
-                + data.get("description", "unknown error")
+                + telegram_error_description(data)
             )
 
     except (requests.RequestException, ValueError, KeyError):
@@ -168,7 +214,7 @@ def send_message(request):
 
 def reactions_page(request):
 
-    ctx = base_context("reactions")
+    ctx = base_context("reactions", include_bots=True)
     ctx["emoji_choices"] = ["💔", "🥰", "👍", "🔥", "✨", "🎉","👏", "🤍", "🌸","❤️‍🔥"]
     return render(request, "pages/reactions.html", ctx)
 
@@ -176,7 +222,7 @@ def reactions_page(request):
 @require_POST
 def apply_reaction(request):
     
-    bot = get_object_or_404(TelegramBot, pk=request.POST.get("bot_id"))
+    bot = get_posted_bot(request)
     chat_id = request.POST.get("chat_id", "").strip()
     message_id = request.POST.get("message_id", "").strip()
     emoji = request.POST.get("emoji", "❤️")
@@ -189,20 +235,24 @@ def apply_reaction(request):
             f"https://api.telegram.org/bot{bot.token}/setMessageReaction",
             json={"chat_id": chat_id, "message_id": int(message_id),
                   "reaction": [{"type": "emoji", "emoji": emoji}], "is_big": False}, timeout=15)
-        data = response.json()
+        data = telegram_response_data(response)
         if response.ok and data.get("ok"):
             log_activity("reaction", f"Left {emoji} on message {message_id}")
             messages.success(request, f"Reaction {emoji} added!")
         else:
-            messages.error(request, "Telegram could not add that reaction: " + data.get("description", "unknown error"))
+            messages.error(
+                request,
+                "Telegram could not add that reaction: "
+                + telegram_error_description(data),
+            )
     except (requests.RequestException, ValueError):
         messages.error(request, "Could not reach Telegram, or the message ID was invalid.")
     return redirect("reactions")
 
 
 def customization(request):
-    pref = get_prefs()
     if request.method == "POST":
+        pref = get_prefs()
         theme = request.POST.get("theme", "strawberry")
         pref.theme = theme if theme in {"strawberry", "lavender", "matcha", "midnight"} else "strawberry"
         pref.compact_mode = request.POST.get("compact_mode") == "on"
@@ -215,13 +265,11 @@ def customization(request):
 
 
 def settings_page(request):
-    pref = get_prefs()
     if request.method == "POST":
+        pref = get_prefs()
         pref.display_name = request.POST.get("display_name", "Berry").strip()[:100] or "Berry"
         pref.save()
         messages.success(request, "Settings saved.")
         return redirect("settings")
     ctx = base_context("settings")
     return render(request, "pages/settings.html", ctx)
-
-

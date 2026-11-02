@@ -58,7 +58,8 @@
                 
                 {% for t in templates %}
                 <button type="button"
-                    class="template use-template" style="text-align:left;width:100%"><strong>{{ t.name }}</strong>
+                    class="template use-template" data-template-body="{{ t.body }}"
+                    style="text-align:left;width:100%"><strong>{{ t.name }}</strong>
                     <p>{{ t.body|truncatechars:180 }}</p><span class="text-link"
                         style="display:inline-block;margin-top:9px">Use this template ↗</span>
                 </button>{% endfor %}</div>{% else %}<div class="empty">

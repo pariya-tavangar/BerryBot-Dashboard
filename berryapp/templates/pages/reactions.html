@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Reactions{% endblock %}
 {% block crumb %}Reactions{% endblock %}
  
@@ -31,7 +32,7 @@
                 <div class="emoji-grid">{% for emoji in emoji_choices %}<button
                         class="emoji-choice {% if forloop.first %}selected{% endif %}" type="button"
                         data-emoji="{{ emoji }}">{{ emoji }}</button>{% endfor %}</div><input type="hidden" name="emoji"
-                    id="chosen-emoji" value="❤️">
+                    id="chosen-emoji" value="💔">
             </div>
             <button class="btn" type="submit" {% if not bots %}disabled{% endif %}>♡ Add reaction</button>
         </form>
@@ -55,6 +56,6 @@
     </div>
 </div>
 
-<script src="{ % static 'js/scripts/reactions.js' % }"></script>
+<script src="{% static 'js/scripts/reactions.js' %}"></script>
 
 {% endblock %}

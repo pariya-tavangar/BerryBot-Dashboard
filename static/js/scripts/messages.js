@@ -1,6 +1,6 @@
     document.querySelectorAll('.use-template').forEach(btn => {
         btn.addEventListener('click', () => {
-            const text = btn.querySelector('p').textContent;
+            const text = btn.dataset.templateBody;
             document.getElementById('message-body').value = text;
             document.getElementById('message-body').focus();
             window.scrollTo({
