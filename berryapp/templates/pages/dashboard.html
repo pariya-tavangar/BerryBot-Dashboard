@@ -3,7 +3,6 @@
 {% block title %}Dashboard{% endblock %}
 {% block crumb %}Dashboard{% endblock %}
 
-
 {% block content %}
 <section class="greeting">
     <div>
@@ -115,13 +114,20 @@
                     <h2>Saved notes 📝</h2>
                     <p>Your message templates</p>
                 </div><a class="text-link" href="{% url 'messages' %}">Manage →</a>
-            </div>{% if templates %}<div class="template-list">{% for t in templates %}<div class="template">
+            </div>{% if templates %}<div class="template-list">
+
+                {% for t in templates %}
+                <div class="template">
                     <strong>{{ t.name }}</strong>
                     <p>{{ t.body|truncatechars:100 }}</p>
-                </div>{% endfor %}</div>{% else %}<div class="empty">
+                </div>{% endfor %}
+            </div>
+            {% else %}
+            <div class="empty">
                 <div class="big">💌</div><strong>Words waiting to bloom</strong>
                 <p>Save a message template to reuse it anytime.</p>
-            </div>{% endif %}
+            </div>
+            {% endif %}
         </section>
 
     </div>

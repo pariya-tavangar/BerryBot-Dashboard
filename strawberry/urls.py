@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from control import views
+from berryapp import views
 
 from django.contrib import admin
 from django.urls import path

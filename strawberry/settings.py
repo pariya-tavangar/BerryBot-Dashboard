@@ -10,7 +10,7 @@ ALLOWED_HOSTS = [x.strip() for x in os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
     "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles",
-    "control",
+    "berryapp.apps.BerryappConfig",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

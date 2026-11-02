@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 
-class ControlConfig(AppConfig):
+class BerryappConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "control"
+    name = "berryapp"
+    label = "berryapp"

@@ -3,6 +3,8 @@
 {% block title %}Messages{% endblock %}
 {% block crumb %}Messages{% endblock %}
 
+{% load static %}
+
 {% block content %}
 <div class="page-heading">
     <div>
@@ -15,10 +17,14 @@
     <div>
         <section class="form-card">
             <h2>Send a message ✨</h2>
-            <p>Choose a bot and a chat or channel it can access.</p>{% if not bots %}<div class="notice">You need to <a
+            <p>Choose a bot and a chat or channel it can access.</p>
+            {% if not bots %}
+            <div class="notice">You need to <a
                     href="{% url 'bots' %}"><b>connect a bot</b></a> before sending messages.</div>{% endif %}<form
                 method="post" action="{% url 'send_message' %}">{% csrf_token %}<div class="field"><label
-                        for="bot_id">Send with</label><select name="bot_id" id="bot_id" required>{% for bot in bots %}
+                        for="bot_id">Send with</label><select name="bot_id" id="bot_id" required>
+                            
+                            {% for bot in bots %}
                         <option value="{{ bot.id }}">{{ bot.name }} (@{{ bot.username }})</option>{% endfor %}</select></div>
                 <div class="field"><label for="chat_id">Recipient chat ID or channel username</label><input id="chat_id"
                         name="chat_id" placeholder="@yourchannel or -1001234567890" required><small>The bot must be able
@@ -59,26 +65,14 @@
 
                 <div class="big">💌</div><strong>Your message box is empty</strong>
                 <p>Save a template and it'll appear here.</p>
-            </div>{% endif %}
+            </div>
+            {% endif %}
         </section>
-        
         <div class="notice">🌷 Sending is a real Telegram action. Double-check the recipient before you send, especially
             for public channels.</div>
     </div>
 </div>
 
-<script>
-    document.querySelectorAll('.use-template').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const text = btn.querySelector('p').textContent;
-            document.getElementById('message-body').value = text;
-            document.getElementById('message-body').focus();
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-    });
-</script>
+<script src="{% static 'js/scripts/messages.js' %}"></script>
 
 {% endblock %}

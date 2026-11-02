@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from .models import TelegramBot, MessageTemplate, Activity, UserPreference
+from .models import TelegramBot,TelegramChat ,MessageTemplate, Activity, UserPreference
 
 from .utils import fetch_bot_profile_image
 
@@ -28,7 +28,7 @@ def dashboard(request):
                 "activities": Activity.objects.all()[:6],
                 "active_bots": TelegramBot.objects.filter(is_active=True).count(),
                 "sent_count": Activity.objects.filter(kind="sent").count()})
-    return render(request, "control/dashboard.html", ctx)
+    return render(request, "pages/dashboard.html", ctx)
 
 
 def bots(request):
@@ -58,7 +58,7 @@ def bots(request):
     
     ctx = base_context("bots")
     ctx["bot_list"] = ctx["bots"]
-    return render(request, "control/bots.html", ctx)
+    return render(request, "pages/bots.html", ctx)
 
 
 @require_POST
@@ -82,40 +82,95 @@ def messages_page(request):
         else:
             messages.error(request, "Give your template a name and some text.")
         return redirect("messages")
+
+    
     ctx = base_context("messages")
     ctx["templates"] = MessageTemplate.objects.order_by("-updated_at")
-    return render(request,"control/messages.html", ctx)
+    ctx["saved_chats"] = TelegramChat.objects.select_related("bot").order_by("-last_used")
+    return render(request, "pages/messages.html", ctx)
+
 
 
 @require_POST
 def send_message(request):
+    bot = get_object_or_404(
+        TelegramBot,
+        pk=request.POST.get("bot_id")
+    )
 
-    bot = get_object_or_404(TelegramBot, pk=request.POST.get("bot_id"))
     chat_id = request.POST.get("chat_id", "").strip()
     body = request.POST.get("body", "").strip()
+
     if not chat_id or not body:
-        messages.error(request, "Choose a recipient and write a message first.")
+        messages.error(
+            request,
+            "Choose a recipient and write a message first."
+        )
         return redirect("messages")
+
     try:
         response = requests.post(
             f"https://api.telegram.org/bot{bot.token}/sendMessage",
-            json={"chat_id": chat_id, "text": body}, timeout=15)
+            json={
+                "chat_id": chat_id,
+                "text": body,
+            },
+            timeout=15,
+        )
+
         data = response.json()
+
         if response.ok and data.get("ok"):
-            log_activity("sent", f"Sent a message with {bot.name} to {chat_id}")
-            messages.success(request, "Message sent! ✨")
+            # Get the actual chat returned by Telegram
+            chat = data["result"]["chat"]
+
+            # Save the chat or update its existing record
+            TelegramChat.objects.update_or_create(
+                bot=bot,
+                chat_id=str(chat["id"]),
+                defaults={
+                    "title": (
+                        chat.get("title")
+                        or chat.get("first_name")
+                        or ""
+                    ),
+                    "username": chat.get("username") or "",
+                    "chat_type": chat.get("type", "private"),
+                },
+            )
+
+            log_activity(
+                "sent",
+                f"Sent a message with {bot.name} to {chat['id']}"
+            )
+
+            messages.success(
+                request,
+                "Message sent! ✨"
+            )
+
         else:
-            messages.error(request, "Telegram could not send it: " + data.get("description", "unknown error"))
-    except (requests.RequestException, ValueError):
-        messages.error(request, "Could not reach Telegram. Please try again.")
+            messages.error(
+                request,
+                "Telegram could not send it: "
+                + data.get("description", "unknown error")
+            )
+
+    except (requests.RequestException, ValueError, KeyError):
+        messages.error(
+            request,
+            "Could not reach Telegram or process its response."
+        )
+
     return redirect("messages")
+
 
 
 def reactions_page(request):
 
     ctx = base_context("reactions")
     ctx["emoji_choices"] = ["💔", "🥰", "👍", "🔥", "✨", "🎉","👏", "🤍", "🌸","❤️‍🔥"]
-    return render(request, "control/reactions.html", ctx)
+    return render(request, "pages/reactions.html", ctx)
 
 
 @require_POST
@@ -156,7 +211,7 @@ def customization(request):
         messages.success(request, "Your space is looking lovely. Preferences saved!")
         return redirect("customization")
     ctx = base_context("customization")
-    return render(request, "control/customization.html", ctx)
+    return render(request, "pages/customization.html", ctx)
 
 
 def settings_page(request):
@@ -167,5 +222,6 @@ def settings_page(request):
         messages.success(request, "Settings saved.")
         return redirect("settings")
     ctx = base_context("settings")
-    return render(request, "control/settings.html", ctx)
-    
+    return render(request, "pages/settings.html", ctx)
+
+

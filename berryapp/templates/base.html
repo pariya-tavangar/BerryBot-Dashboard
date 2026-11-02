@@ -7,20 +7,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#fff0f5">
   <title>{% block title %}Home{% endblock %} | Berry Bots</title>
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
 
-<body
-
-  class="theme-{{ prefs.theme|default:'strawberry' }} {% if prefs.compact_mode %}compact{% endif %} {% if not prefs.animations %}no-animations{% endif %}">
+<body 
+class="theme-{{ prefs.theme|default:'strawberry' }}
+{% if prefs.compact_mode %}compact{% endif %}
+{% if not prefs.animations %}no-animations{% endif %}">
   
-
-
-
-
   <div class="shell">
-
-
     <aside class="sidebar" id="sidebar">
       <a href="{% url 'dashboard' %}" class="brand">
         <div class="brand-icon">
@@ -79,30 +74,18 @@
       </header>
       {% if messages %}<div class="messages">{% for message in messages %}<div
           class="alert {% if message.tags == 'error' %}error{% endif %}">{{ message }}</div>{% endfor %}</div>{% endif %}
+
+
       {% block content %}{% endblock %}
-      <div class="footer">made with <span>♥</span> and a little strawberry magic</div>
+
+      
+      <div class="footer">All Rights Reserved to<span> BerryBots ♥ </span> | @jojogeek</div>
     </main>
 
   </div>
 
   
-  <script>
-    (function () {
-      const c = document.getElementById('desktop-crumb');
-      if (c && window.innerWidth > 720) c.style.display = 'block';
-      window.addEventListener('resize', () => {
-        if (c) c.style.display = window.innerWidth > 720 ? 'block' : 'none'
-      });
-    })();
-
-    function useTemplate(text) {
-      const field = document.getElementById('message-body');
-      if (field) {
-        field.value = text;
-        field.focus();
-      }
-    }
-  </script>
+<script src="{ % static 'js/base.js' % }"></script>
 </body>
 
 </html>

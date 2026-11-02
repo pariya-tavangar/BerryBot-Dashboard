@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Reactions{% endblock %}
 {% block crumb %}Reactions{% endblock %}
-
+ 
 {% block content %}
 <div class="page-heading">
     <div>
@@ -54,10 +54,7 @@
             permissions, and some chats restrict available emoji.</div>
     </div>
 </div>
-<script>
-    document.querySelectorAll('.emoji-choice').forEach(b => b.addEventListener('click', () => {
-        document.querySelectorAll('.emoji-choice').forEach(x => x.classList.remove('selected'));
-        b.classList.add('selected');
-        document.getElementById('chosen-emoji').value = b.dataset.emoji;
-    }));
-</script>{% endblock %}
+
+<script src="{ % static 'js/scripts/reactions.js' % }"></script>
+
+{% endblock %}

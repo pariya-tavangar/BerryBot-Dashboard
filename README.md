@@ -13,7 +13,7 @@ py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 Copy-Item .env.example .env
-python manage.py makemigrations control
+python manage.py makemigrations berrybot
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
