@@ -6,7 +6,7 @@
 {% block content %}
 <section class="greeting">
     <div>
-        <div class="eyebrow">Good z · GOOD THINGS AHEAD</div>
+        <div class="eyebrow">WELCOME · GOOD LUCK!</div>
         <h1>Hey, {{ prefs.display_name }}! <span>🌸</span></h1>
         <p>Your little bot garden is looking lovely. Here's what's blooming today.</p>
     </div>
@@ -80,12 +80,17 @@
                     <p>Everything your bots have been up to</p>
                 </div>
             </div>
-            {% if activities %}<div class="activity">{% for item in activities %}<div class="activity-row">
+            {% if activities %}
+            <div class="activity">
+                {% for item in activities|slice:":5" %}
+                <div class="activity-row">
                     <div class="activity-icon">
                         {% if item.kind == 'sent' %}💌{% elif item.kind == 'bot' %}👾{% elif item.kind == 'reaction' %}💗{% else %}✨{% endif %}
                     </div>
                     <div><strong>{{ item.text }}</strong><small>{{ item.created_at|timesince }} ago</small></div>
-                </div>{% endfor %}</div>{% else %}<div class="empty">
+                </div>{% endfor %}
+            </div>{% else %}
+            <div class="empty">
                 <div class="big">🫧</div><strong>All quiet for now</strong>
                 <p>Bot connections and sent messages will show up here.</p>
             </div>{% endif %}

@@ -46,10 +46,12 @@
             </div><span
                 class="status {% if bot.is_active %}online{% else %}offline{% endif %}">{% if bot.is_active %}Active{% else %}Paused{% endif %}</span>
         </div>
-        <div style="margin-top:16px;font-size:11px;color:var(--muted)">Added
-            {{ bot.created_at|date:"M j, Y" }}</div>
-        <div class="bot-card-foot"><span class="muted" style="font-size:11px">API token stored privately in local
-                DB</span>
+                <div style="margin-top:16px;font-size:11px;color:var(--muted)">
+                {{ bot.bio|default:"No Bio Detected" }}
+                </div>
+
+        <div class="bot-card-foot"><span class="muted" style="font-size:11px">Added
+            {{ bot.created_at|date:"M j, Y" }}</span>
             <form method="post" action="{% url 'delete_bot' bot.id %}">{% csrf_token %}<button
                     class="btn secondary small"
                     onclick="return confirm('Remove this bot from your garden?')">Remove</button></form>

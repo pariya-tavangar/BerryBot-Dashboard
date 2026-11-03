@@ -14,8 +14,12 @@ class TelegramBot(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_checked = models.DateTimeField(null=True, blank=True)
+    bio = models.CharField(max_length=120, blank=True, default="")
+    description = models.TextField(blank=True, default="")
+
     def __str__(self):
         return self.name
+
 
 
 class MessageTemplate(models.Model):

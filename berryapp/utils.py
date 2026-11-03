@@ -4,6 +4,7 @@ from .models import TelegramBot
 
 
 def fetch_bot_profile_image(bot_record: TelegramBot):
+
     """
     Fetch a bot's profile image from Telegram
     and save it to Django's media storage.
@@ -92,10 +93,62 @@ def fetch_bot_profile_image(bot_record: TelegramBot):
             ContentFile(image_response.content),
             save=False
         )
-
         bot_record.save(update_fields=["profile_image"])
 
         return True
 
     except requests.RequestException:
         return False
+
+
+def fetch_bot_profile_info(bot_record: TelegramBot):
+    """
+    Fetch a bot's short bio and full description from Telegram
+    and save them to the database.
+    """
+
+    token = bot_record.token
+    base_url = f"https://api.telegram.org/bot{token}/"
+
+    try:
+        # short bio.
+        bio_response = requests.get(
+            f"{base_url}getMyShortDescription",
+            timeout=15
+        )
+        bio_response.raise_for_status()
+
+        bio_data = bio_response.json()
+
+        if not bio_data.get("ok"):
+            return False
+
+        # full description
+        description_response = requests.get(
+            f"{base_url}getMyDescription",
+            timeout=15
+        )
+        description_response.raise_for_status()
+
+        description_data = description_response.json()
+
+        if not description_data.get("ok"):
+            return False
+
+        # extract information.
+        bio = bio_data["result"].get("short_description", "")
+        description = description_data["result"].get("description", "")
+
+        # save information.
+        bot_record.bio = bio
+        bot_record.description = description
+
+        bot_record.save(
+            update_fields=["bio", "description"]
+        )
+
+        return True
+
+    except (requests.RequestException, ValueError, KeyError):
+        return False
+

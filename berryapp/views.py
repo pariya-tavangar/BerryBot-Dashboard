@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from .models import TelegramBot,TelegramChat ,MessageTemplate, Activity, UserPreference
 
-from .utils import fetch_bot_profile_image
+from .utils import fetch_bot_profile_image , fetch_bot_profile_info
 
 def get_prefs():
     pref, _ = UserPreference.objects.get_or_create(pk=1)
@@ -48,6 +48,7 @@ def bots(request):
                     info = data["result"]
                     bot = TelegramBot.objects.create(name=name, username=info.get("username", ""), token=token)
                     fetch_bot_profile_image(bot)
+                    fetch_bot_profile_info(bot)
                     log_activity("bot", f"Connected @{bot.username or bot.name}")
                     messages.success(request, f"Connected @{info.get('username', name)} successfully!")
                 else:
