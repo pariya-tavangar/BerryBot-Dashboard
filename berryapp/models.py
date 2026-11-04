@@ -1,7 +1,6 @@
 from django.db import models
 
 class TelegramBot(models.Model):
-    
     name = models.CharField(max_length=100)
     username = models.CharField(max_length=100, blank=True)
     token = models.CharField(max_length=255)
@@ -26,17 +25,29 @@ class MessageTemplate(models.Model):
     name = models.CharField(max_length=100)
     body = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return self.name
 
+
 class Activity(models.Model):
+    bot = models.ForeignKey(
+        TelegramBot,
+        on_delete=models.CASCADE,
+        related_name="activities",
+        null=True,
+        blank=True)
+
     kind = models.CharField(max_length=30, default="note")
     text = models.CharField(max_length=240)
     created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         ordering = ["-created_at"]
+
     def __str__(self):
         return self.text
+
 
 class UserPreference(models.Model):
     theme = models.CharField(max_length=30, default="strawberry")
@@ -44,9 +55,9 @@ class UserPreference(models.Model):
     compact_mode = models.BooleanField(default=False)
     animations = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return "Dashboard preferences"
-
 
 
 class TelegramChat(models.Model):
@@ -66,6 +77,7 @@ class TelegramChat(models.Model):
     chat_id = models.CharField(max_length=100)
     title = models.CharField(max_length=255, blank=True)
     username = models.CharField(max_length=100, blank=True)
+
     chat_type = models.CharField(
         max_length=20,
         choices=CHAT_TYPES,

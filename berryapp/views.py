@@ -13,8 +13,11 @@ def get_prefs():
     return pref
 
 
-def log_activity(kind, text):
-    Activity.objects.create(kind=kind, text=text)
+def log_activity(kind, text, bot=None):
+    Activity.objects.create(
+        bot=bot,
+        kind=kind,
+        text=text)
 
 
 def base_context(active):
@@ -49,7 +52,15 @@ def bots(request):
                     bot = TelegramBot.objects.create(name=name, username=info.get("username", ""), token=token)
                     fetch_bot_profile_image(bot)
                     fetch_bot_profile_info(bot)
-                    log_activity("bot", f"Connected @{bot.username or bot.name}")
+
+                    bot.last_checked = timezone.now()
+                    bot.save(update_fields=["last_checked"])
+
+                    log_activity(
+                        "bot",
+                        f"Connected @{bot.username or bot.name}",
+                        bot=bot)
+                    
                     messages.success(request, f"Connected @{info.get('username', name)} successfully!")
                 else:
                     messages.error(request, "Telegram could not validate this token. Check it with BotFather.")
@@ -92,6 +103,7 @@ def messages_page(request):
 
 
 
+
 @require_POST
 def send_message(request):
     bot = get_object_or_404(
@@ -122,10 +134,8 @@ def send_message(request):
         data = response.json()
 
         if response.ok and data.get("ok"):
-            # Get the actual chat returned by Telegram
             chat = data["result"]["chat"]
 
-            # Save the chat or update its existing record
             TelegramChat.objects.update_or_create(
                 bot=bot,
                 chat_id=str(chat["id"]),
@@ -142,7 +152,8 @@ def send_message(request):
 
             log_activity(
                 "sent",
-                f"Sent a message with {bot.name} to {chat['id']}"
+                f"Sent a message with {bot.name} to {chat['id']}",
+                bot=bot
             )
 
             messages.success(
@@ -192,7 +203,7 @@ def apply_reaction(request):
                   "reaction": [{"type": "emoji", "emoji": emoji}], "is_big": False}, timeout=15)
         data = response.json()
         if response.ok and data.get("ok"):
-            log_activity("reaction", f"Left {emoji} on message {message_id}")
+            log_activity("reaction",f"Left {emoji} on message {message_id}",bot=bot)
             messages.success(request, f"Reaction {emoji} added!")
         else:
             messages.error(request, "Telegram could not add that reaction: " + data.get("description", "unknown error"))
@@ -226,3 +237,114 @@ def settings_page(request):
     return render(request, "pages/settings.html", ctx)
 
 
+
+
+def bot_detail(request, bot_id):
+    bot = get_object_or_404(TelegramBot, pk=bot_id)
+
+    discovered_chats = TelegramChat.objects.filter(
+        bot=bot
+    ).order_by("-last_used")
+
+    chat_type = request.GET.get("type", "")
+
+    valid_types = [
+        "private",
+        "group",
+        "supergroup",
+        "channel"
+    ]
+
+    if chat_type in valid_types:
+        discovered_chats = discovered_chats.filter(
+            chat_type=chat_type
+        )
+
+    bot_activities = Activity.objects.filter(bot=bot)
+
+    stats = {
+        "discovered_chats": TelegramChat.objects.filter(
+            bot=bot
+        ).count(),
+
+        "messages_sent": bot_activities.filter(
+            kind="sent"
+        ).count(),
+
+        "reactions": bot_activities.filter(
+            kind="reaction"
+        ).count(),
+    }
+
+    recent_activities = bot_activities[:6]
+
+    ctx = base_context("bots")
+
+    ctx.update({
+        "bot": bot,
+        "stats": stats,
+        "discovered_chats": discovered_chats,
+        "recent_activities": recent_activities,
+        "selected_chat_type": chat_type,
+    })
+
+    return render(
+        request,
+        "pages/bot_detail.html",
+        ctx
+    )
+
+
+
+@require_POST
+def toggle_bot_status(request, bot_id):
+    bot = get_object_or_404(TelegramBot, pk=bot_id)
+
+    bot.is_active = not bot.is_active
+    bot.save(update_fields=["is_active"])
+
+    status = "activated" if bot.is_active else "deactivated"
+
+    messages.success(
+        request,
+        f"{bot.name} has been {status}."
+    )
+
+    return redirect("bot_detail", bot_id=bot.pk)
+
+
+
+@require_POST
+def check_bot_connection(request, bot_id):
+    bot = get_object_or_404(TelegramBot, pk=bot_id)
+
+    try:
+        response = requests.get(
+            f"https://api.telegram.org/bot{bot.token}/getMe",
+            timeout=12
+        )
+
+        data = response.json()
+
+        if response.ok and data.get("ok"):
+            bot.last_checked = timezone.now()
+            bot.save(update_fields=["last_checked"])
+
+            messages.success(
+                request,
+                f"{bot.name} connection is working! ✨"
+            )
+
+        else:
+            messages.error(
+                request,
+                "Telegram could not verify this bot."
+            )
+
+    except (requests.RequestException, ValueError):
+        messages.error(
+            request,
+            "Could not connect to Telegram."
+        )
+
+    return redirect("bot_detail", bot_id=bot.pk)

@@ -52,9 +52,29 @@
 
         <div class="bot-card-foot"><span class="muted" style="font-size:11px">Added
             {{ bot.created_at|date:"M j, Y" }}</span>
-            <form method="post" action="{% url 'delete_bot' bot.id %}">{% csrf_token %}<button
+            <form method="post" action="{% url 'delete_bot' bot.id %}">{% csrf_token %}
+                <button
                     class="btn secondary small"
-                    onclick="return confirm('Remove this bot from your garden?')">Remove</button></form>
+                    onclick="return confirm('Remove this bot from your garden?')">Remove</button>
+                </form>
+
+            <form method="post" action="{% url 'bot_detail' bot.id %}">{% csrf_token %}
+                <button
+                    class="btn secondary small"
+                    onclick=return>Details</button>
+                </form>
+
+            <form method="post" action="{% url 'toggle_bot_status' bot.id %}">{% csrf_token %}
+                <button
+                    class="btn secondary small"
+                    onclick=return>
+                {% if bot.is_active %}    
+                    Pause
+                {% else %}
+                    Activate bot
+                {% endif %}
+                </button>
+                </form>
         </div>
     </article>
     {% empty %}

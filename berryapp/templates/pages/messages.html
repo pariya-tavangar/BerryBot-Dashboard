@@ -20,19 +20,26 @@
             <p>Choose a bot and a chat or channel it can access.</p>
             {% if not bots %}
             <div class="notice">You need to <a
-                    href="{% url 'bots' %}"><b>connect a bot</b></a> before sending messages.</div>{% endif %}<form
-                method="post" action="{% url 'send_message' %}">{% csrf_token %}<div class="field"><label
-                        for="bot_id">Send with</label><select name="bot_id" id="bot_id" required>
-                            
+                    href="{% url 'bots' %}"><b>connect a bot</b></a> before sending messages.</div>{% endif %}
+                    
+                <form method="post" action="{% url 'send_message' %}">
+                    {% csrf_token %}
+                    <div class="field"><label for="bot_id">Send with</label>
+                        <select name="bot_id" id="bot_id" required>
                             {% for bot in bots %}
-                        <option value="{{ bot.id }}">{{ bot.name }} (@{{ bot.username }})</option>{% endfor %}</select></div>
+                        <option value="{{ bot.id }}">
+                            {{ bot.name }} (@{{ bot.username }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 <div class="field"><label for="chat_id">Recipient chat ID or channel username</label><input id="chat_id"
                         name="chat_id" placeholder="@yourchannel or -1001234567890" required><small>The bot must be able
                         to access the chat. For channels, it usually needs posting permissions.</small></div>
                 <div class="field"><label for="message-body">Your message</label><textarea id="message-body" name="body"
                         placeholder="Write something lovely..." required></textarea><small>Plain text is supported.
                         Telegram formatting options can be added later.</small></div><button class="btn" type="submit"
-                    {% if not bots %}disabled{% endif %}>♡ Send message</button>
+                    {% if not bots %}disabled{% endif %}>
+                    ♡ Send message</button>
             </form>
         </section>
         <section class="form-card">
