@@ -51,7 +51,7 @@
                     <p>A quick peek at your connected bots</p>
                 </div><a class="text-link" href="{% url 'bots' %}">All bots →</a>
             </div>
-            {% if bots %}<div class="bot-list">{% for bot in bots|slice:":4" %}<div class="bot-row">
+            {% if bots %}<div class="bot-list">{% for bot in bots|slice:":3" %}<div class="bot-row">
                     <div class="bot-face"> {% if bot.profile_image %}
                 <img
                     src="{{ bot.profile_image.url }}"
